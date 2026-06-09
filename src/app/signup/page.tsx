@@ -27,7 +27,7 @@ export default function SignUpPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/board");
+      router.push("/ventures");
       router.refresh();
     }
   };
@@ -40,7 +40,7 @@ export default function SignUpPage() {
             Builder&apos;s Assembly
           </h1>
           <p className="text-xs tracking-[2px] uppercase text-[#9b7a8f] font-medium mt-2">
-            Hospitality \u00b7 Community \u00b7 Momentum
+            Hospitality · Community · Momentum
           </p>
         </div>
 
