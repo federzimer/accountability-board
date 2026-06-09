@@ -7,6 +7,7 @@ const TABS = [
   { seg: "goals", label: "Goals" },
   { seg: "board", label: "Board" },
   { seg: "readiness", label: "Readiness" },
+  { seg: "stakeholders", label: "Stakeholders" },
 ];
 
 export default function VentureNav({ id, active }: { id: string; active: string }) {

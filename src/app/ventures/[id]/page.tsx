@@ -26,17 +26,23 @@ export default async function VentureOverview({
   if (!project) notFound();
 
   const supabase = await createClient();
-  const [{ data: goalsData }, { data: tacticsData }, { data: readyData }, { count: backlogCount }] =
-    await Promise.all([
-      supabase.from("goals").select("*").eq("project_id", id).order("created_at"),
-      supabase.from("tactics").select("status").eq("project_id", id),
-      supabase.from("readiness_items").select("is_done").eq("project_id", id),
-      supabase
-        .from("bets")
-        .select("id", { count: "exact", head: true })
-        .eq("project_id", id)
-        .eq("status", "backlog"),
-    ]);
+  const [
+    { data: goalsData },
+    { data: tacticsData },
+    { data: readyData },
+    { count: backlogCount },
+    { count: peopleCount },
+  ] = await Promise.all([
+    supabase.from("goals").select("*").eq("project_id", id).order("created_at"),
+    supabase.from("tactics").select("status").eq("project_id", id),
+    supabase.from("readiness_items").select("is_done").eq("project_id", id),
+    supabase
+      .from("bets")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", id)
+      .eq("status", "backlog"),
+    supabase.from("stakeholders").select("id", { count: "exact", head: true }).eq("project_id", id),
+  ]);
   const goals = (goalsData as Goal[]) ?? [];
   const tactics = (tacticsData as { status: string }[]) ?? [];
   const readyDone = ((readyData as { is_done: boolean }[]) ?? []).filter((r) => r.is_done).length;
@@ -124,6 +130,23 @@ export default async function VentureOverview({
                 </div>
               ))}
             </div>
+          </Link>
+
+          <Link
+            href={`/ventures/${id}/stakeholders`}
+            className="bg-white border border-[#ddd2c8] rounded-xl p-5 hover:border-[#c4a8b8] hover:-translate-y-0.5 transition-all"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#3d1c1c]">
+                Stakeholders
+              </h3>
+              <span className="text-sm font-extrabold text-[#9b7a8f]">{peopleCount ?? 0}</span>
+            </div>
+            <p className="text-[12px] text-[#8b7b7b]">
+              {peopleCount
+                ? `${peopleCount} ${peopleCount === 1 ? "person" : "people"} helping this venture`
+                : "Add the people helping this venture"}
+            </p>
           </Link>
         </section>
 

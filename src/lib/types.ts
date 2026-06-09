@@ -11,6 +11,22 @@ export type Member = {
   avatar_url: string | null;
   role: "member" | "admin";
   is_active: boolean;
+  calendar_token: string;
+  created_at: string;
+};
+
+// A per-venture contact: who's helping with this business and how.
+export type Stakeholder = {
+  id: string;
+  project_id: string;
+  member_id: string;
+  name: string;
+  role: string;
+  helpful_for: string;
+  email: string;
+  phone: string;
+  notes: string;
+  position: number;
   created_at: string;
 };
 
