@@ -4,6 +4,7 @@ import { getMyMember } from "@/lib/data";
 
 const NAV = [
   { href: "/ventures", label: "Ventures" },
+  { href: "/board", label: "Board" },
   { href: "/checkin", label: "Check-in" },
   { href: "/members", label: "Members" },
   { href: "/leaderboard", label: "Leaderboard" },

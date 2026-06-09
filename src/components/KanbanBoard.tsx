@@ -21,16 +21,22 @@ type Card = {
   position: number;
   created_at: string;
   goal_id: string | null;
+  project_id: string | null;
   notes: string;
   deadline: string | null;
 };
 
+// Minimal venture info for the consolidated (global) board's venture chips.
+export type BoardProject = { id: string; name: string; color: string | null };
+
 export default function KanbanBoard({
   goals = [],
   projectId = null,
+  projects = [],
 }: {
   goals?: Goal[];
   projectId?: string | null;
+  projects?: BoardProject[];
 }) {
   const [cards, setCards] = useState<Card[]>([]);
   const [newCardTitle, setNewCardTitle] = useState("");
@@ -39,6 +45,9 @@ export default function KanbanBoard({
   const supabase = createClient();
 
   const goalById = (id: string | null) => goals.find((g) => g.id === id) ?? null;
+  const projectById = (id: string | null) => projects.find((p) => p.id === id) ?? null;
+  // Global board = not scoped to one venture; show a venture chip per card.
+  const isGlobal = !projectId;
 
   const fetchCards = useCallback(async () => {
     const {
@@ -202,6 +211,11 @@ export default function KanbanBoard({
                     {getColumnCards(column.id).map((card, index) => {
                       const goal = goalById(card.goal_id);
                       const gc = colorForKey(goal?.color);
+                      // On the global board, tag each card with its venture and
+                      // fall back to the venture's color for the left stripe.
+                      const venture = isGlobal ? projectById(card.project_id) : null;
+                      const vc = colorForKey(venture?.color);
+                      const stripe = gc?.stripe ?? vc?.stripe ?? "border-l-[#ddd2c8]";
                       const overdue =
                         card.deadline &&
                         card.status !== "completed" &&
@@ -215,7 +229,7 @@ export default function KanbanBoard({
                               {...provided.dragHandleProps}
                               onClick={() => setOpenId(card.id)}
                               className={`bg-[#f5f0ea] border border-[#ddd2c8] rounded-lg p-3 cursor-pointer transition-all border-l-4 ${
-                                gc?.stripe ?? "border-l-[#ddd2c8]"
+                                stripe
                               } ${
                                 snapshot.isDragging
                                   ? "shadow-lg shadow-[#3d1c1c]/10 rotate-2"
@@ -225,8 +239,17 @@ export default function KanbanBoard({
                               <p className="text-sm text-[#3d1c1c] leading-relaxed">
                                 {card.title}
                               </p>
-                              {(goal || card.deadline || card.notes) && (
+                              {(venture || goal || card.deadline || card.notes) && (
                                 <div className="flex items-center flex-wrap gap-1.5 mt-2">
+                                  {venture && (
+                                    <span
+                                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                                        vc?.chipBg ?? "bg-[#f0e8df]"
+                                      } ${vc?.chipText ?? "text-[#8b6b6b]"}`}
+                                    >
+                                      {venture.name}
+                                    </span>
+                                  )}
                                   {goal && (
                                     <span
                                       className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
