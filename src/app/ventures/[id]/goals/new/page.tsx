@@ -3,6 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import VentureHeader from "@/components/VentureHeader";
 import GoalWizard from "@/components/GoalWizard";
 import { getCurrentCycle, getMyMember, getProject } from "@/lib/data";
+import { createClient } from "@/lib/supabase-server";
 import { defaultGoalEndISO } from "@/lib/sprint";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,17 @@ export default async function VentureNewGoalPage({
   if (!project) notFound();
 
   const cycle = await getCurrentCycle();
+
+  // The life goals this venture serves — fed to the coach so its suggestions
+  // ladder up to the member's broader direction.
+  const supabase = await createClient();
+  const { data: linkRows } = await supabase
+    .from("project_life_goals")
+    .select("life_goals(title)")
+    .eq("project_id", id);
+  const lifeGoals = ((linkRows ?? []) as unknown as { life_goals: { title: string } | null }[])
+    .map((r) => r.life_goals?.title)
+    .filter((t): t is string => !!t);
 
   return (
     <div className="min-h-screen">
@@ -39,6 +51,7 @@ export default async function VentureNewGoalPage({
           cycleId={cycle?.id ?? null}
           projectId={id}
           defaultEnd={defaultGoalEndISO()}
+          lifeGoals={lifeGoals}
         />
       </main>
     </div>

@@ -39,6 +39,19 @@ export type Cycle = {
   created_at: string;
 };
 
+export type LifeGoalKind = "vision" | "goal" | "value";
+
+// The "why" layer above ventures — about the person, not a business.
+export type LifeGoal = {
+  id: string;
+  member_id: string;
+  kind: LifeGoalKind;
+  title: string;
+  description: string;
+  position: number;
+  created_at: string;
+};
+
 // A venture = a business. Top-level container for goals, board, readiness.
 // Runs its own 90-day sprint from start_date.
 export type Project = {

@@ -5,8 +5,9 @@ import VentureNav from "@/components/VentureNav";
 import VentureHeader from "@/components/VentureHeader";
 import GoalCard from "@/components/GoalCard";
 import DeleteVentureButton from "@/components/DeleteVentureButton";
+import VentureLifeGoalsLink from "@/components/VentureLifeGoalsLink";
 import { createClient } from "@/lib/supabase-server";
-import { getMyMember, getProject } from "@/lib/data";
+import { getMyMember, getMyLifeGoals, getProject } from "@/lib/data";
 import { READINESS_TOTAL } from "@/lib/readiness";
 import { STATUS_META } from "@/lib/tactics";
 import type { Goal } from "@/lib/types";
@@ -43,6 +44,16 @@ export default async function VentureOverview({
       .eq("status", "backlog"),
     supabase.from("stakeholders").select("id", { count: "exact", head: true }).eq("project_id", id),
   ]);
+
+  // Life goals this venture serves (for the "ladders up to" strip + coach).
+  const lifeGoals = await getMyLifeGoals();
+  const { data: linkRows } = await supabase
+    .from("project_life_goals")
+    .select("life_goal_id")
+    .eq("project_id", id);
+  const linkedLifeGoalIds = ((linkRows as { life_goal_id: string }[]) ?? []).map(
+    (r) => r.life_goal_id
+  );
   const goals = (goalsData as Goal[]) ?? [];
   const tactics = (tacticsData as { status: string }[]) ?? [];
   const readyDone = ((readyData as { is_done: boolean }[]) ?? []).filter((r) => r.is_done).length;
@@ -56,6 +67,12 @@ export default async function VentureOverview({
       <main className="p-6 max-w-4xl mx-auto">
         <VentureHeader project={project} />
         <VentureNav id={id} active="" />
+
+        <VentureLifeGoalsLink
+          projectId={id}
+          lifeGoals={lifeGoals}
+          initialLinked={linkedLifeGoalIds}
+        />
 
         {/* Goals */}
         <section className="mb-8">

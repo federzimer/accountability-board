@@ -3,6 +3,7 @@ import SignOutButton from "./SignOutButton";
 import { getMyMember } from "@/lib/data";
 
 const NAV = [
+  { href: "/life", label: "Life Goals" },
   { href: "/ventures", label: "Ventures" },
   { href: "/board", label: "Board" },
   { href: "/checkin", label: "Check-in" },

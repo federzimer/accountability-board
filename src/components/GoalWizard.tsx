@@ -21,11 +21,13 @@ export default function GoalWizard({
   cycleId,
   projectId,
   defaultEnd,
+  lifeGoals = [],
 }: {
   memberId: string;
   cycleId: string | null; // current cycle, for per-person check-in cadence
   projectId: string; // the venture this goal belongs to
   defaultEnd: string; // YYYY-MM-DD, default goal deadline (today + 90 days)
+  lifeGoals?: string[]; // life goals this venture serves — for coach alignment
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -71,10 +73,13 @@ export default function GoalWizard({
     setCoachBusy(true);
     setCoachNote("");
     try {
+      // Always give the coach the member's life goals so its suggestions
+      // ladder up to their broader direction.
+      const fullContext = lifeGoals.length ? { ...context, life_goals: lifeGoals } : context;
       const res = await fetch("/api/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step, context }),
+        body: JSON.stringify({ step, context: fullContext }),
       });
       const json = await res.json();
       if (!res.ok || json.available === false) {

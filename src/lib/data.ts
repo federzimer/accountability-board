@@ -1,7 +1,20 @@
 import { createClient } from "./supabase-server";
-import type { Cycle, Member, Project } from "./types";
+import type { Cycle, LifeGoal, Member, Project } from "./types";
 
 // Server-side helpers shared across pages.
+
+// All life goals (vision / goal / value) owned by the current member.
+export async function getMyLifeGoals(): Promise<LifeGoal[]> {
+  const member = await getMyMember();
+  if (!member) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("life_goals")
+    .select("*")
+    .eq("member_id", member.id)
+    .order("position");
+  return (data as LifeGoal[]) ?? [];
+}
 
 // All ventures owned by the current member, newest first.
 export async function getMyProjects(): Promise<Project[]> {
