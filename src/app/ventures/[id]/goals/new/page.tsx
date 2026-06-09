@@ -3,7 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import VentureHeader from "@/components/VentureHeader";
 import GoalWizard from "@/components/GoalWizard";
 import { getCurrentCycle, getMyMember, getProject } from "@/lib/data";
-import { sprintFromStart } from "@/lib/sprint";
+import { defaultGoalEndISO } from "@/lib/sprint";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,6 @@ export default async function VentureNewGoalPage({
   if (!project) notFound();
 
   const cycle = await getCurrentCycle();
-  const sprint = sprintFromStart(project.start_date);
 
   return (
     <div className="min-h-screen">
@@ -39,7 +38,7 @@ export default async function VentureNewGoalPage({
           memberId={member.id}
           cycleId={cycle?.id ?? null}
           projectId={id}
-          sprintEnd={sprint.endISO}
+          defaultEnd={defaultGoalEndISO()}
         />
       </main>
     </div>

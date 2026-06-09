@@ -4,7 +4,6 @@ import AppHeader from "@/components/AppHeader";
 import { createClient } from "@/lib/supabase-server";
 import { getMyMember, getMyProjects } from "@/lib/data";
 import { colorForKey } from "@/lib/goalColors";
-import { sprintFromStart, SPRINT_DAYS } from "@/lib/sprint";
 import { READINESS_TOTAL } from "@/lib/readiness";
 
 export const dynamic = "force-dynamic";
@@ -76,7 +75,6 @@ export default async function VenturesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {projects.map((p) => {
               const gc = colorForKey(p.color);
-              const sprint = sprintFromStart(p.start_date);
               const goals = goalCount.get(p.id) ?? 0;
               const ready = readyCount.get(p.id) ?? 0;
               return (
@@ -99,9 +97,6 @@ export default async function VenturesPage() {
                   <div className="flex items-center gap-4 text-[11px] uppercase tracking-[1px] text-[#8b7b7b] mt-3">
                     <span>{goals} {goals === 1 ? "goal" : "goals"}</span>
                     <span>{ready}/{READINESS_TOTAL} ready</span>
-                    <span className="ml-auto text-[#9b7a8f] font-semibold">
-                      {sprint.ended ? "sprint done" : `${sprint.daysLeft}d left`}
-                    </span>
                   </div>
                 </Link>
               );

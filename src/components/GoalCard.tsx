@@ -1,5 +1,6 @@
 import type { Goal } from "@/lib/types";
 import { colorForKey } from "@/lib/goalColors";
+import { goalCountdown } from "@/lib/sprint";
 
 // Read-only goal display with a progress bar (current_value / target_value).
 export default function GoalCard({ goal }: { goal: Goal }) {
@@ -7,6 +8,8 @@ export default function GoalCard({ goal }: { goal: Goal }) {
   const pct =
     target > 0 ? Math.min(Math.round((goal.current_value / target) * 100), 100) : 0;
   const gc = colorForKey(goal.color);
+  // The 90-day clock lives on the goal. Only show it for active goals.
+  const countdown = goal.status === "active" ? goalCountdown(goal.end_date) : null;
 
   const statusColor =
     goal.status === "achieved"
@@ -22,11 +25,28 @@ export default function GoalCard({ goal }: { goal: Goal }) {
           {gc && <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${gc.dot}`} />}
           {goal.title}
         </h3>
-        <span
-          className={`shrink-0 text-[10px] uppercase tracking-[1px] font-semibold px-2 py-0.5 rounded-full ${statusColor}`}
-        >
-          {goal.status}
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {countdown && (
+            <span
+              className={`text-[10px] uppercase tracking-[1px] font-semibold px-2 py-0.5 rounded-full ${
+                countdown.overdue
+                  ? "text-[#9c4a44] bg-[#f5dad7]"
+                  : countdown.daysLeft <= 14
+                  ? "text-[#8a7327] bg-[#f5ecd0]"
+                  : "text-[#8b7b7b] bg-[#f0e8df]"
+              }`}
+            >
+              {countdown.overdue
+                ? `${Math.abs(countdown.daysLeft)}d over`
+                : `${countdown.daysLeft}d left`}
+            </span>
+          )}
+          <span
+            className={`text-[10px] uppercase tracking-[1px] font-semibold px-2 py-0.5 rounded-full ${statusColor}`}
+          >
+            {goal.status}
+          </span>
+        </div>
       </div>
 
       {goal.why && (

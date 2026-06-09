@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { nextColorKey } from "@/lib/goalColors";
+import { defaultGoalEndISO } from "@/lib/sprint";
 import type { Bet } from "@/lib/types";
 
 // "Next up" — the ranked backlog of bets that weren't promoted to goals yet.
@@ -68,6 +69,7 @@ export default function BetBoard({
         title: bet.title,
         the_bet: bet.note || bet.title,
         source_idea_id: bet.source_idea_id,
+        end_date: defaultGoalEndISO(),
         color,
       })
       .select()

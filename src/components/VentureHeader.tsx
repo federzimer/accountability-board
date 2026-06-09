@@ -1,12 +1,15 @@
 import Link from "next/link";
 import type { Project } from "@/lib/types";
 import { colorForKey } from "@/lib/goalColors";
-import { sprintFromStart, SPRINT_DAYS } from "@/lib/sprint";
 
-// Venture name, color, and 90-day sprint progress. Shown atop every venture page.
+// Venture name + color. Ventures are long-term — no 90-day countdown here
+// (that lives on goals). Shows a quiet "since" date for context.
 export default function VentureHeader({ project }: { project: Project }) {
   const gc = colorForKey(project.color);
-  const sprint = sprintFromStart(project.start_date);
+  const since = new Date(project.start_date + "T00:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
 
   return (
     <div className="mb-5">
@@ -23,21 +26,9 @@ export default function VentureHeader({ project }: { project: Project }) {
             <p className="text-[13px] text-[#8b6b6b] mt-1 max-w-xl">{project.description}</p>
           )}
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-[13px] font-semibold text-[#3d1c1c]">
-            {sprint.ended ? "Sprint complete" : `Day ${sprint.dayOf} of ${SPRINT_DAYS}`}
-          </p>
-          <p className="text-[11px] uppercase tracking-[1px] text-[#9b7a8f]">
-            {sprint.ended ? "90-day sprint" : `${sprint.daysLeft} days left`}
-          </p>
-        </div>
-      </div>
-      {/* sprint progress bar */}
-      <div className="mt-3 h-1.5 w-full rounded-full bg-[#efe6dc] overflow-hidden">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#c4a8b8] to-[#9b7a8f] transition-all"
-          style={{ width: `${sprint.pct}%` }}
-        />
+        <p className="text-[11px] uppercase tracking-[1px] text-[#9b7a8f] shrink-0 pt-1">
+          Since {since}
+        </p>
       </div>
     </div>
   );

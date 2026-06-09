@@ -4,6 +4,7 @@ import AppHeader from "@/components/AppHeader";
 import VentureNav from "@/components/VentureNav";
 import VentureHeader from "@/components/VentureHeader";
 import GoalCard from "@/components/GoalCard";
+import DeleteVentureButton from "@/components/DeleteVentureButton";
 import { createClient } from "@/lib/supabase-server";
 import { getMyMember, getProject } from "@/lib/data";
 import { READINESS_TOTAL } from "@/lib/readiness";
@@ -124,6 +125,16 @@ export default async function VentureOverview({
               ))}
             </div>
           </Link>
+        </section>
+
+        {/* Danger zone */}
+        <section className="mt-10 pt-5 border-t border-[#f0e8df] flex justify-end">
+          <DeleteVentureButton
+            projectId={id}
+            projectName={project.name}
+            goalCount={goals.length}
+            tacticCount={tactics.length}
+          />
         </section>
       </main>
     </div>

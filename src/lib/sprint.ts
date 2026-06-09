@@ -1,38 +1,36 @@
-// 90-day sprint math for a venture, anchored on its start_date.
+// 90-day GOAL window helpers. Ventures are long-term businesses — the 90-day
+// clock lives on individual goals (goal.end_date), not on the venture.
 
-export const SPRINT_DAYS = 90;
+export const GOAL_DAYS = 90;
 
-export type Sprint = {
-  startISO: string;
-  endISO: string;
-  dayOf: number; // 1-based day within the sprint (clamped 1..90)
-  daysLeft: number; // remaining days (0..90)
-  pct: number; // elapsed %
-  ended: boolean;
-};
-
-function dateOnly(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+function localISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function addDays(iso: string, days: number): string {
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return localISO(d);
 }
 
-export function sprintFromStart(startISO: string, now: Date = new Date()): Sprint {
-  const start = new Date(startISO + "T00:00:00");
-  const today = dateOnly(now);
-  const elapsed = Math.floor((today.getTime() - dateOnly(start).getTime()) / 86_400_000);
-  const dayOf = Math.min(Math.max(elapsed + 1, 1), SPRINT_DAYS);
-  const daysLeft = Math.min(Math.max(SPRINT_DAYS - elapsed, 0), SPRINT_DAYS);
-  return {
-    startISO,
-    endISO: addDays(startISO, SPRINT_DAYS),
-    dayOf,
-    daysLeft,
-    pct: Math.min(Math.max(Math.round((elapsed / SPRINT_DAYS) * 100), 0), 100),
-    ended: elapsed >= SPRINT_DAYS,
-  };
+// Default deadline for a new goal: today + 90 days.
+export function defaultGoalEndISO(now: Date = new Date()): string {
+  return addDays(localISO(now), GOAL_DAYS);
+}
+
+export type Countdown = { daysLeft: number; overdue: boolean };
+
+// Days remaining until a goal's end_date (negative if past). null if no date.
+export function goalCountdown(
+  endISO: string | null | undefined,
+  now: Date = new Date()
+): Countdown | null {
+  if (!endISO) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(endISO + "T00:00:00");
+  const daysLeft = Math.round((end.getTime() - today.getTime()) / 86_400_000);
+  return { daysLeft, overdue: daysLeft < 0 };
 }

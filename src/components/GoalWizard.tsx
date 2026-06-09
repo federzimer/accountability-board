@@ -20,12 +20,12 @@ export default function GoalWizard({
   memberId,
   cycleId,
   projectId,
-  sprintEnd,
+  defaultEnd,
 }: {
   memberId: string;
   cycleId: string | null; // current cycle, for per-person check-in cadence
   projectId: string; // the venture this goal belongs to
-  sprintEnd: string; // YYYY-MM-DD, the venture's 90-day end (default goal deadline)
+  defaultEnd: string; // YYYY-MM-DD, default goal deadline (today + 90 days)
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function GoalWizard({
   const [title, setTitle] = useState("");
   const [metric, setMetric] = useState("");
   const [target, setTarget] = useState("");
-  const [endDate, setEndDate] = useState(sprintEnd);
+  const [endDate, setEndDate] = useState(defaultEnd);
   const [why, setWhy] = useState("");
   const [goalId, setGoalId] = useState<string | null>(null);
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import type { Goal, GoalStatus } from "@/lib/types";
 import { GOAL_COLORS, nextColorKey } from "@/lib/goalColors";
+import { defaultGoalEndISO } from "@/lib/sprint";
 
 const MAX_GOALS = 3;
 const EMPTY = {
@@ -14,6 +15,7 @@ const EMPTY = {
   current_value: "",
   status: "active" as GoalStatus,
   color: GOAL_COLORS[0].key,
+  end_date: "",
 };
 
 type Draft = typeof EMPTY;
@@ -45,10 +47,15 @@ export default function GoalEditor({
     current_value: draft.current_value === "" ? 0 : Number(draft.current_value),
     status: draft.status,
     color: draft.color,
+    end_date: draft.end_date || null,
   });
 
   const startAdd = () => {
-    setDraft({ ...EMPTY, color: nextColorKey(goals.map((g) => g.color)) });
+    setDraft({
+      ...EMPTY,
+      color: nextColorKey(goals.map((g) => g.color)),
+      end_date: defaultGoalEndISO(), // 90-day deadline by default
+    });
     setAdding(true);
     setEditingId(null);
     setError("");
@@ -63,6 +70,7 @@ export default function GoalEditor({
       current_value: g.current_value?.toString() ?? "",
       status: g.status,
       color: g.color ?? GOAL_COLORS[0].key,
+      end_date: g.end_date ?? "",
     });
     setEditingId(g.id);
     setAdding(false);
@@ -271,7 +279,7 @@ function GoalForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={label}>Status</label>
           <select
@@ -283,6 +291,15 @@ function GoalForm({
             <option value="achieved">Achieved</option>
             <option value="missed">Missed</option>
           </select>
+        </div>
+        <div>
+          <label className={label}>Deadline (90-day)</label>
+          <input
+            className={field}
+            type="date"
+            value={draft.end_date}
+            onChange={(e) => setDraft({ ...draft, end_date: e.target.value })}
+          />
         </div>
         <div>
           <label className={label}>Project color</label>
