@@ -24,6 +24,7 @@ type Card = {
   project_id: string | null;
   notes: string;
   deadline: string | null;
+  subtasks?: { id: string; is_done: boolean }[];
 };
 
 // Minimal venture info for the consolidated (global) board's venture chips.
@@ -56,7 +57,7 @@ export default function KanbanBoard({
     if (!user) return;
     let query = supabase
       .from("tactics")
-      .select("*")
+      .select("*, subtasks(id, is_done)")
       .eq("user_id", user.id)
       .order("position", { ascending: true });
     // Scope to a venture's board when one is provided.
@@ -216,6 +217,8 @@ export default function KanbanBoard({
                       const venture = isGlobal ? projectById(card.project_id) : null;
                       const vc = colorForKey(venture?.color);
                       const stripe = gc?.stripe ?? vc?.stripe ?? "border-l-[#ddd2c8]";
+                      const subTotal = card.subtasks?.length ?? 0;
+                      const subDone = card.subtasks?.filter((s) => s.is_done).length ?? 0;
                       const overdue =
                         card.deadline &&
                         card.status !== "completed" &&
@@ -239,8 +242,20 @@ export default function KanbanBoard({
                               <p className="text-sm text-[#3d1c1c] leading-relaxed">
                                 {card.title}
                               </p>
-                              {(venture || goal || card.deadline || card.notes) && (
+                              {(venture || goal || card.deadline || card.notes || subTotal > 0) && (
                                 <div className="flex items-center flex-wrap gap-1.5 mt-2">
+                                  {subTotal > 0 && (
+                                    <span
+                                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                                        subDone === subTotal
+                                          ? "bg-[#dbe8d5] text-[#5a7456]"
+                                          : "bg-[#f0e8df] text-[#8b6b6b]"
+                                      }`}
+                                      title="Subtasks done"
+                                    >
+                                      ✓ {subDone}/{subTotal}
+                                    </span>
+                                  )}
                                   {venture && (
                                     <span
                                       className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
@@ -345,7 +360,10 @@ export default function KanbanBoard({
           goals={goals}
           onSave={(patch) => updateTactic(openCard.id, patch)}
           onDelete={() => deleteTactic(openCard.id)}
-          onClose={() => setOpenId(null)}
+          onClose={() => {
+            setOpenId(null);
+            fetchCards(); // pick up any subtask changes for the progress chip
+          }}
         />
       )}
     </>

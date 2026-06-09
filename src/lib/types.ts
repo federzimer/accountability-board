@@ -113,6 +113,30 @@ export type Tactic = {
   created_at: string;
 };
 
+// A step inside a board task — the "recipe" to execute it.
+export type Subtask = {
+  id: string;
+  tactic_id: string;
+  member_id: string | null;
+  title: string;
+  is_done: boolean;
+  position: number;
+  created_at: string;
+};
+
+export type FeedbackKind = "feature" | "bug" | "idea";
+export type FeedbackStatus = "open" | "planned" | "in_progress" | "done" | "declined";
+
+export type Feedback = {
+  id: string;
+  member_id: string;
+  kind: FeedbackKind;
+  title: string;
+  detail: string;
+  status: FeedbackStatus;
+  created_at: string;
+};
+
 export type WeeklyCheckin = {
   id: string;
   member_id: string;

@@ -9,6 +9,7 @@ const NAV = [
   { href: "/members", label: "Members" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/feedback", label: "Feedback" },
 ];
 
 // Shared top bar. `active` is the href of the current page (for highlight).

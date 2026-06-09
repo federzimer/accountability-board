@@ -20,9 +20,27 @@ Favor specific, testable suggestions. Assume the member is time-poor and running
 You respond with ONLY the JSON object requested for the given step — no prose around it.`;
 
 // ── Per-step output schemas (structured outputs guarantee valid JSON) ──────
-type Step = "brainstorm" | "summarize" | "bet" | "measurable" | "tactics";
+type Step = "brainstorm" | "summarize" | "bet" | "measurable" | "tactics" | "breakdown";
 
 const SCHEMAS: Record<Step, Record<string, unknown>> = {
+  // Break a committed task into an ordered recipe of concrete sub-steps.
+  breakdown: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      approach: {
+        type: "string",
+        description: "One sentence naming the smartest approach to tackle this task.",
+      },
+      subtasks: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "3-6 concrete, ordered sub-steps — the smallest physical next actions to execute the task. Each should start with a verb.",
+      },
+    },
+    required: ["approach", "subtasks"],
+  },
   // Expand the dump with fresh ideas.
   brainstorm: {
     type: "object",
@@ -133,6 +151,8 @@ function userPrompt(step: Step, context: Record<string, unknown>): string {
       return `STEP: Make it measurable. Given the member's chosen bet and goal title, suggest the single best metric to track with a realistic 90-day target, how to measure it, and a short why. Add 1-2 alternative metrics.\nContext (their bet + goal):\n${ctx}\nReturn { metric, target_value, how_to_measure, why, alternatives }.`;
     case "tactics":
       return `STEP: Week one. Suggest 3 concrete tactics to commit to this week toward the goal.\nContext (their goal + metric):\n${ctx}\nReturn { tactics }.`;
+    case "breakdown":
+      return `STEP: Break it down. The member has a committed board task and is asking "what's the approach to tackle this?" Break it into the smallest concrete next actions — a recipe they can just execute. Name the approach in one sentence, then give 3-6 ordered sub-steps (each starting with a verb, specific to THIS task). Suggest tools/shortcuts where it speeds them up.\nContext (the task + its goal):\n${ctx}\nReturn { approach, subtasks }.`;
   }
 }
 
