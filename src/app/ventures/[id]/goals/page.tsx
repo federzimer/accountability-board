@@ -4,9 +4,10 @@ import AppHeader from "@/components/AppHeader";
 import VentureNav from "@/components/VentureNav";
 import VentureHeader from "@/components/VentureHeader";
 import GoalEditor from "@/components/GoalEditor";
+import BetBoard from "@/components/BetBoard";
 import { createClient } from "@/lib/supabase-server";
 import { getCurrentCycle, getMyMember, getProject } from "@/lib/data";
-import type { Goal } from "@/lib/types";
+import type { Bet, Goal } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,17 @@ export default async function VentureGoalsPage({
 
   const cycle = await getCurrentCycle();
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("goals")
-    .select("*")
-    .eq("project_id", id)
-    .order("created_at");
-  const goals = (data as Goal[]) ?? [];
+  const [{ data: goalsData }, { data: betsData }] = await Promise.all([
+    supabase.from("goals").select("*").eq("project_id", id).order("created_at"),
+    supabase
+      .from("bets")
+      .select("*")
+      .eq("project_id", id)
+      .eq("status", "backlog")
+      .order("rank"),
+  ]);
+  const goals = (goalsData as Goal[]) ?? [];
+  const backlog = (betsData as Bet[]) ?? [];
 
   return (
     <div className="min-h-screen">
@@ -63,6 +69,13 @@ export default async function VentureGoalsPage({
           cycleId={cycle?.id ?? null}
           memberId={member.id}
           projectId={id}
+        />
+
+        <BetBoard
+          projectId={id}
+          cycleId={cycle?.id ?? null}
+          initialBets={backlog}
+          goalsAtCapacity={goals.length >= 3}
         />
       </main>
     </div>

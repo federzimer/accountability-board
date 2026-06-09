@@ -25,11 +25,17 @@ export default async function VentureOverview({
   if (!project) notFound();
 
   const supabase = await createClient();
-  const [{ data: goalsData }, { data: tacticsData }, { data: readyData }] = await Promise.all([
-    supabase.from("goals").select("*").eq("project_id", id).order("created_at"),
-    supabase.from("tactics").select("status").eq("project_id", id),
-    supabase.from("readiness_items").select("is_done").eq("project_id", id),
-  ]);
+  const [{ data: goalsData }, { data: tacticsData }, { data: readyData }, { count: backlogCount }] =
+    await Promise.all([
+      supabase.from("goals").select("*").eq("project_id", id).order("created_at"),
+      supabase.from("tactics").select("status").eq("project_id", id),
+      supabase.from("readiness_items").select("is_done").eq("project_id", id),
+      supabase
+        .from("bets")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", id)
+        .eq("status", "backlog"),
+    ]);
   const goals = (goalsData as Goal[]) ?? [];
   const tactics = (tacticsData as { status: string }[]) ?? [];
   const readyDone = ((readyData as { is_done: boolean }[]) ?? []).filter((r) => r.is_done).length;
@@ -51,7 +57,7 @@ export default async function VentureOverview({
               90-Day Goals
             </h3>
             <Link href={`/ventures/${id}/goals`} className="text-xs text-[#9b7a8f] hover:underline">
-              Manage →
+              {backlogCount ? `Manage · ${backlogCount} in Next up →` : "Manage →"}
             </Link>
           </div>
           {goals.length ? (

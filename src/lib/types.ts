@@ -63,6 +63,24 @@ export type Idea = {
   created_at: string;
 };
 
+export type BetStatus = "backlog" | "promoted" | "dropped";
+
+// A ranked, persistent candidate direction from the brainstorm. Top-ranked
+// bets get promoted into 90-day goals; the rest stay as a backlog ("next up").
+export type Bet = {
+  id: string;
+  project_id: string;
+  member_id: string;
+  cycle_id: string | null;
+  title: string;
+  note: string;
+  rank: number; // 1 = top priority
+  status: BetStatus;
+  source_idea_id: string | null;
+  goal_id: string | null;
+  created_at: string;
+};
+
 export type Tactic = {
   id: string;
   user_id: string;
